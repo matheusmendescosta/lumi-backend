@@ -1,7 +1,5 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, PDFFile } from '@prisma/client';
 
 export interface InvoiceRepository {
-  create(
-    data: Prisma.basicInvoiceInformationCreateInput
-  ): Promise<Prisma.basicInvoiceInformationCreateInput>;
+  create(data: Prisma.PDFFileCreateInput): Promise<PDFFile>;
 }

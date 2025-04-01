@@ -13,6 +13,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model PDFFile {
+  id        String   @id @default(uuid())
+  fileName  String
+  content   String
+  createdAt DateTime @default(now())
+}
+
 model basicInvoiceInformation {
   id                 String           @id @default(uuid())
   name               String

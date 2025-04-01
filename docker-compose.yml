@@ -35,6 +35,23 @@ services:
     networks:
       - backend-network
 
+  redis:
+    container_name: redis
+    image: redis:7.2.4
+    restart: always
+    ports:
+      - ${REDIS_PORT}
+    networks:
+      - backend-network
+    volumes:
+      - redis_data_container:/var/lib/redis/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+
   web:
     stdin_open: true
     tty: true
@@ -72,3 +89,4 @@ networks:
 
 volumes:
   pgadmin_data:
+  redis_data_container:

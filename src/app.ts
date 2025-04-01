@@ -1,5 +1,6 @@
-import express from "express";
-import dotenv from "dotenv";
+import express from 'express';
+import dotenv from 'dotenv';
+import routerInvoice from './http/controllers/invoice/route';
 
 dotenv.config();
 
@@ -7,10 +8,14 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/api", (req, res) => {
+const baseUrl = '/api/v1/';
+
+app.use(baseUrl + 'health', (req, res) => {
   res.status(200).json({
-    msg: "Server is up and running",
+    msg: 'health',
   });
 });
+
+app.use(baseUrl + routerInvoice);
 
 export default app;
