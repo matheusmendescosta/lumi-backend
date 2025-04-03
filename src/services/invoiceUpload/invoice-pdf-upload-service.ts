@@ -1,6 +1,7 @@
 import { InvoiceRepository } from '@/repositories/invoice-repository';
-import { parsePDF } from '@/utils/pdf-parse';
+import { extractClientNumber, parsePDF } from '@/utils/pdf-parse';
 import { PDFFile } from '@prisma/client';
+import { NumberClientNotFound } from '../errors/number-client-not-found';
 
 interface InvoicePdfUploadServiceRequest {
   fileName: string;
@@ -18,11 +19,14 @@ export class InvoicePdfUploadService {
     fileName,
     filePath,
   }: InvoicePdfUploadServiceRequest): Promise<InvoicePdfUploadServiceResponse> {
-    const content = await parsePDF(filePath);
+    const text = await parsePDF(filePath);
+    const clientNumber = extractClientNumber(text);
+
+    if (!clientNumber) throw new NumberClientNotFound();
 
     const pdf = await this.invoiceRepository.create({
       fileName,
-      content,
+      content: clientNumber,
     });
 
     return { pdf };
