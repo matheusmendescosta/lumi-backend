@@ -1,5 +1,5 @@
 import { InvoiceRepository } from '@/repositories/invoice-repository';
-import { extractClientNumber, parsePDF } from '@/utils/pdf-parse';
+import { extractBilledValues, extractClientNumber, extractInstallationNumber, extractPaymentAmount, parsePDF } from '@/utils/pdf-parse';
 import { PDFFile } from '@prisma/client';
 import { NumberClientNotFound } from '../errors/number-client-not-found';
 
@@ -20,7 +20,7 @@ export class InvoicePdfUploadService {
     filePath,
   }: InvoicePdfUploadServiceRequest): Promise<InvoicePdfUploadServiceResponse> {
     const text = await parsePDF(filePath);
-    const clientNumber = extractClientNumber(text);
+    const clientNumber = extractBilledValues(text);
 
     if (!clientNumber) throw new NumberClientNotFound();
 

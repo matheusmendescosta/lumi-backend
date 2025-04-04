@@ -37,7 +37,7 @@ export const InvoicePdfUploadController = async (
         details: error.errors,
       });
     }
-
+    console.log(error)
     return response.status(500).json({
       error: 'Internal server error.',
     });
