@@ -21,35 +21,12 @@ model PDFFile {
 }
 
 model basicInvoiceInformation {
-  id                 String           @id @default(uuid())
+  id                 String @id @default(uuid())
   name               String
   clientNumber       String
   installationNumber String
   mouthReference     String
-  dueDate            DateTime
-  paymentValue       Float
-  class              String
-  subclass           String
-  modalityTariff     String
-  readingBefore      String
-  readingCurrent     String
-  totalDays          Int
-  nextReading        DateTime
-  invoicedValues     invoicedValues[]
-}
-
-model invoicedValues {
-  id                        String                  @id @default(uuid())
-  invoiceItems              String
-  unit                      String
-  amount                    Int
-  valueUnit                 Float
-  value                     Float
-  pisCofins                 String
-  baseCalculationICMS       String
-  aliquotICMS               String
-  ICMS                      String
-  rateUnit                  Float
-  basicInvoiceInformationId String
-  basicInvoiceInformation   basicInvoiceInformation @relation(fields: [basicInvoiceInformationId], references: [id])
+  dueDate            String
+  paymentValue       String
+  invoiceItems       Json
 }

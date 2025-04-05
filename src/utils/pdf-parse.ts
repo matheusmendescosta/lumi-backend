@@ -1,5 +1,5 @@
-import fs from 'fs';
-import pdf from 'pdf-parse';
+import fs from "fs";
+import pdf from "pdf-parse";
 
 export async function parsePDF(filePath: string): Promise<string> {
   const dataBuffer = fs.readFileSync(filePath);
@@ -7,41 +7,99 @@ export async function parsePDF(filePath: string): Promise<string> {
   return data.text;
 }
 
-export function extractClientNumber(text: string): string | null {
-  const match = text.match(/Nº DO CLIENTE\s+(\d+)/i);
+export function extractClientNumber(text: string) {
+  const firstMatch = text.match(/(instalação)(\n| |[0-9])+(Referente)/i)?.at(0);
 
-  return match ? match[1] : null;
+  if (!firstMatch) return "";
+
+  const clientNumber = firstMatch.match(/[0-9]+/g)?.at(0);
+
+  if (!clientNumber) return "";
+
+  return clientNumber;
 }
 
-export function extractPaymentAmount(text: string): string | null {
-  const match = text.match(/Valor a pagar.*?\n.*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+export function extractInstallNumber(text: string) {
+  const firstMatch = text.match(/(instalação)(\n| |[0-9])+(Referente)/i)?.at(0);
 
-  return match ? match[1] : null;
+  if (!firstMatch) return "";
+
+  const installNumber = firstMatch.match(/[0-9]+/g)?.at(1);
+
+  if (!installNumber) return "";
+
+  return installNumber;
 }
 
-export function extractInstallationNumber(text: string): string | null {
-  const match = text.match(/Nº DA INSTALAÇÃO\s+(\d+)/i);
-
-  return match ? match[1] : null;
+export function extractReferenceMonth(text: string) {
+  return text
+    .match(/(Referente)(.|\n)*(NOTA FISCAL N)/)
+    ?.at(0)
+    ?.match(/([A-Z]{3}\/[0-9]{4})/)
+    ?.at(0);
 }
 
-export function extractBilledValues(text: string): string {
-  const regex =
-    /(Energia Elétrica|Energia SCEE s\/ ICMS|Energia compensada GD I|Contrib Ilum Publica Municipal)\s+(\w+)?\s*(\d+)?\s*([\d.,]+)?\s*([\d.,-]+)?\s*([\d.,-]+)?/g;
-  const matches = text.matchAll(regex);
+export function extractTotalPayment(text: string) {
+  return text
+    .match(/(Referente)(.|\n)*(NOTA FISCAL N)/)
+    ?.at(0)
+    ?.match(/\d+,\d{2}/)
+    ?.at(0);
+}
 
-  let result = 'Itens Faturados:\n';
+export function extractDueDate(text: string) {
+  return text
+    .match(/(Referente)(.|\n)*(NOTA FISCAL N)/)
+    ?.at(0)
+    ?.match(/\d{2}\/\d{2}\/\d{4}/)
+    ?.at(0);
+}
 
-  for (const match of matches) {
-    const item = match[1];
-    const unit = match[2] || '';
-    const quantity = match[3] ? match[3] : '';
-    const unitPrice = match[4] ? match[4].replace(',', '.') : '';
-    const totalValue = match[5] ? match[5].replace(',', '.') : '';
-    const pisCofins = match[6] ? match[6].replace(',', '.') : '';
+export function extractInvoiceItems(text: string) {
+  const rawSection = text.match(/(Valores Faturados)(.|\n)*(DiaDias)/)?.at(0);
 
-    result += `${item} ${unit} ${quantity} ${unitPrice} ${totalValue} ${pisCofins}\n`;
+  if (!rawSection) return null;
+
+  const lines = rawSection
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line !== "" &&
+        !line.startsWith("Valores Faturados") &&
+        !line.startsWith("DiaDias")
+    );
+
+  const items = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().includes("TOTAL")) continue;
+
+    const matches = line.match(/-?\d+,\d{2}/g);
+    if (!matches) continue;
+
+    const valor = parseFloat(matches.at(-1)!.replace(",", "."));
+    const quant = matches.length >= 4 ? parseInt(matches[0]) : null;
+    const precoUnit =
+      matches.length >= 4 ? parseFloat(matches[1].replace(",", ".")) : null;
+    const pisCofins =
+      matches.length >= 4 ? parseFloat(matches[3].replace(",", ".")) : null;
+
+    const nomeItem = line.split(/kWh| \d{1,3} /)[0].trim();
+    const unid = line.includes("kWh") ? "kWh" : null;
+
+    items.push({
+      item: nomeItem,
+      unid,
+      quant,
+      precoUnit,
+      valor,
+      pisCofins,
+    });
   }
 
-  return result;
+  const totalMatch = rawSection.match(/TOTAL\s+(\d+,\d{2})/);
+  const total = totalMatch ? parseFloat(totalMatch[1].replace(",", ".")) : null;
+
+  return { items, total };
 }

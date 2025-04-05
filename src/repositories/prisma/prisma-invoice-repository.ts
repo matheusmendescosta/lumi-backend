@@ -1,8 +1,24 @@
-import { prisma } from '@/lib/prisma';
-import { PDFFile, Prisma } from '@prisma/client';
-import { InvoiceRepository } from '../invoice-repository';
+import { prisma } from "@/lib/prisma";
+import { basicInvoiceInformation, PDFFile, Prisma } from "@prisma/client";
+import { InvoiceRepository } from "../invoice-repository";
 
 export class PrismaInvoiceRepository implements InvoiceRepository {
+  async list(): Promise<basicInvoiceInformation[]> {
+    const pdfs = await prisma.basicInvoiceInformation.findMany();
+
+    return pdfs;
+  }
+
+  async createBasicInformation(
+    data: Prisma.basicInvoiceInformationCreateInput
+  ): Promise<basicInvoiceInformation> {
+    const basicInformation = await prisma.basicInvoiceInformation.create({
+      data,
+    });
+
+    return basicInformation;
+  }
+
   async create(data: Prisma.PDFFileCreateInput): Promise<PDFFile> {
     const pdf = await prisma.pDFFile.create({
       data: {

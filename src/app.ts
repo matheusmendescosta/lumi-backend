@@ -13,7 +13,6 @@ app.use(baseUrl + "health", (_, response) => {
   });
 });
 
-
 app.use(baseUrl, routerInvoice);
 
 export default app;
