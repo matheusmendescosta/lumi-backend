@@ -1,9 +1,11 @@
 import express from "express";
 import routerInvoice from "./http/controllers/invoice/route";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 const baseUrl = "/api/v1/";
 

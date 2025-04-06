@@ -10,6 +10,7 @@ import {
 } from "@/utils/pdf-parse";
 import { PDFFile } from "@prisma/client";
 import { NumberClientNotFound } from "../errors/number-client-not-found";
+import { InvoiceAlreadyExists } from "../errors/invoice-already-exists";
 
 interface InvoicePdfUploadServiceRequest {
   fileName: string;
@@ -44,33 +45,23 @@ export class InvoicePdfUploadService {
     const dueDate = extractDueDate(text);
     if (!dueDate) throw new Error("DueDateNotFound");
 
+    const dueDateAlreadyExists = await this.invoiceRepository.findByDueDate(
+      dueDate
+    );
+
+    if (dueDateAlreadyExists) throw new InvoiceAlreadyExists();
+
     const invoiceItems = extractInvoiceItems(text);
     if (!invoiceItems) throw new Error("InvoiceItemsNotFound");
 
     await this.invoiceRepository.createBasicInformation({
-      name: "",
+      name: fileName,
       clientNumber: clientNumber,
       installationNumber: installNumber,
       mouthReference: referenceMonth,
       dueDate: dueDate,
       paymentValue: paymentValue,
-      // class: "no",
-      // subclass: "no",
-      // modalityTariff: "no",
-      // readingBefore: "no",
-      // readingCurrent: "no",
-      // totalDays: "no",
-      // nextReading: "no",
       invoiceItems: invoiceItems,
-      // unit: "no",
-      // amount: "no",
-      // valueUnit: "no",
-      // value: "no",
-      // pisCofins: "no",
-      // baseCalculationICMS: "no",
-      // aliquotICMS: "no",
-      // ICMS: "no",
-      // rateUnit: "no",
     });
 
     const pdf = await this.invoiceRepository.create({

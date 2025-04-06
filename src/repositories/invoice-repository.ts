@@ -8,4 +8,6 @@ export interface InvoiceRepository {
   ): Promise<basicInvoiceInformation>;
 
   list(): Promise<basicInvoiceInformation[]>;
+
+  findByDueDate(dueDate: string): Promise<basicInvoiceInformation | null>;
 }

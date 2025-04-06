@@ -1,7 +1,8 @@
-import { PrismaInvoiceRepository } from '@/repositories/prisma/prisma-invoice-repository';
-import { InvoicePdfUploadService } from '@/services/invoiceUpload/invoice-pdf-upload-service';
-import { Request, Response } from 'express';
-import { z, ZodError } from 'zod';
+import { PrismaInvoiceRepository } from "@/repositories/prisma/prisma-invoice-repository";
+import { InvoiceAlreadyExists } from "@/services/errors/invoice-already-exists";
+import { InvoicePdfUploadService } from "@/services/invoiceUpload/invoice-pdf-upload-service";
+import { Request, Response } from "express";
+import { z, ZodError } from "zod";
 
 const invoiceUploadSchema = z.object({
   fileName: z.string(),
@@ -15,7 +16,7 @@ export const InvoicePdfUploadController = async (
   try {
     if (!request.file) {
       return response.status(400).json({
-        error: 'File upload failed.',
+        error: "File upload failed.",
       });
     }
 
@@ -31,15 +32,21 @@ export const InvoicePdfUploadController = async (
 
     return response.status(201).json(pdf);
   } catch (error) {
+    if (error instanceof InvoiceAlreadyExists) {
+      return response.status(409).json({
+        error: error.message,
+      });
+    }
+
     if (error instanceof ZodError) {
       return response.status(400).json({
-        error: 'Validation error.',
+        error: "Validation error.",
         details: error.errors,
       });
     }
-    console.log(error)
+    console.log(error);
     return response.status(500).json({
-      error: 'Internal server error.',
+      error: "Internal server error.",
     });
   }
 };
