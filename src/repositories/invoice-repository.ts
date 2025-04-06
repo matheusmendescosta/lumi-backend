@@ -10,4 +10,6 @@ export interface InvoiceRepository {
   list(): Promise<basicInvoiceInformation[]>;
 
   findByDueDate(dueDate: string): Promise<basicInvoiceInformation | null>;
+
+  findByMonthReferenceOrder(): Promise<basicInvoiceInformation[]>;
 }

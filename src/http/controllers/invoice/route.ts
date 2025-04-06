@@ -14,4 +14,6 @@ routerInvoice.post(
 
 routerInvoice.get("/list", listInvoiceController);
 
+routerInvoice.get("/listmouthreference", listInvoiceController);
+
 export default routerInvoice;
