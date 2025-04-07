@@ -3,7 +3,7 @@
 
 # 🚀 Desafio Técnico - API
 
-Esta é uma API desenvolvida como parte de um desafio técnico. O projeto foi construído com foco em boas práticas de desenvolvimento, utilizando [Node.js / TypeScript / Express] *(ou substitua pelas tecnologias corretas)*.
+Esta é uma API desenvolvida como parte de um desafio técnico. O projeto foi construído com foco em boas práticas de desenvolvimento, utilizando [Node.js / TypeScript / Express / Postgres / Prisma].
 
 ## 🛠️ Tecnologias
 
